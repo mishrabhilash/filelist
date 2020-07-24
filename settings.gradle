@@ -1,0 +1,3 @@
+include ':filelist'
+include ':app'
+rootProject.name = "FileList Sample"

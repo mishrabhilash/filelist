@@ -1,0 +1,11 @@
+<resources>
+    <string name="title_activity_files">FilesActivity</string>
+    <string name="miscellaneous">Miscellaneous</string>
+    <string name="done_text">Done</string>
+
+    <plurals name="num_files_selected_text">
+        <item quantity="zero">%1$d file selected</item>
+        <item quantity="one">%1$d file selected</item>
+        <item quantity="other">%1$d files selected</item>
+    </plurals>
+</resources>
