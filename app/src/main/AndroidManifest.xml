@@ -18,7 +18,10 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ListActivity"/>
+        <activity
+            android:name=".ListActivity"
+            android:theme="@style/ListTheme"
+            />
     </application>
 
 </manifest>

@@ -48,6 +48,7 @@ class ListActivity : AppCompatActivity(), ListFragment.Listener {
         setContentView(R.layout.activity_list)
 
         initViews()
+        setSupportActionBar(toolbar)
         setActionBarTitle()
 
         progress.visibility = View.VISIBLE
@@ -134,6 +135,7 @@ class ListActivity : AppCompatActivity(), ListFragment.Listener {
     private fun initViews() {
         viewPager = findViewById(R.id.main_view_pager)
         tabLayout = findViewById(R.id.main_tab_layout)
+        toolbar = findViewById(R.id.main_toolbar)
     }
 
     private fun setupViewPager() {
@@ -149,7 +151,7 @@ class ListActivity : AppCompatActivity(), ListFragment.Listener {
     }
 
     private fun setActionBarTitle() {
-        supportActionBar?.title = resources.getQuantityString(
+        toolbar?.title = resources.getQuantityString(
             R.plurals.num_files_selected_text,
             selectedFiles.size,
             selectedFiles.size
