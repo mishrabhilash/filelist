@@ -10,6 +10,7 @@ import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.provider.OpenableColumns
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -22,6 +23,7 @@ import com.abhilashmishra.filelist.adapter.ViewPagerAdapter
 import com.abhilashmishra.filelist.core.Viewer
 import com.abhilashmishra.filelist.fragment.ListFragment
 import com.abhilashmishra.filelist.model.File
+import com.abhilashmishra.filelist.model.Sendable
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -96,33 +98,6 @@ class ListActivity : AppCompatActivity(), ListFragment.Listener {
         startActivityForResult(intent, FILE_CHOOSER_REQUEST_CODE)
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == FILE_CHOOSER_REQUEST_CODE) {
-            if (resultCode == Activity.RESULT_OK) {
-                val clipData: ClipData? = data?.clipData
-                val clipDataList = ArrayList<String>()
-                for (index in 0 until (clipData?.itemCount ?: 0)) {
-                    clipData?.getItemAt(index)?.uri?.let { clipDataList.add(it.toString()) }
-                }
-                data?.data?.let {
-                    clipDataList.add(it.toString())
-                }
-
-                val returnIntent = Intent()
-                returnIntent.putStringArrayListExtra(
-                    Viewer.KEY_VIEWER_SELECTED_LIST,
-                    clipDataList
-                ).putExtra(
-                    Viewer.KEY_VIEWER_SELECTED_LIST_TYPE,
-                    Viewer.KEY_VIEWER_SELECTED_LIST_TYPE_URI
-                )
-                setResult(Activity.RESULT_OK, returnIntent)
-                finish()
-            }
-        }
-        super.onActivityResult(requestCode, resultCode, data)
-    }
-
     override fun onFileClicked(file: File, isSelected: Boolean) {
         if (isSelected) {
             selectedFiles.add(file)
@@ -192,7 +167,7 @@ class ListActivity : AppCompatActivity(), ListFragment.Listener {
             it.forEach { applicationInfo ->
                 val icon = applicationInfo.loadIcon(packageManager)
                 if (!isSystemPackage(applicationInfo)) {
-                    val appName = packageManager.getApplicationLabel(applicationInfo)
+                    val appName = "${packageManager.getApplicationLabel(applicationInfo)}.apk"
                     val file = getFile("", appName.toString(), "APK", icon)
                     fileApkDirMap[file] = getApkDir(applicationInfo)
                     if (!mimeTypeCache.contains(file.type.name)) {
@@ -255,7 +230,7 @@ class ListActivity : AppCompatActivity(), ListFragment.Listener {
     private fun sendResult() {
         val returnIntent = Intent()
         returnIntent
-            .putStringArrayListExtra(Viewer.KEY_VIEWER_SELECTED_LIST, getResultList())
+            .putParcelableArrayListExtra(Viewer.KEY_VIEWER_SELECTED_LIST, getResultList())
             .putExtra(
                 Viewer.KEY_VIEWER_SELECTED_LIST_TYPE,
                 Viewer.KEY_VIEWER_SELECTED_LIST_TYPE_FILEPATH
@@ -264,23 +239,59 @@ class ListActivity : AppCompatActivity(), ListFragment.Listener {
         finish()
     }
 
-    private fun getResultList(): ArrayList<String> {
-        val resultList = ArrayList<String>()
+    private fun getResultList(): ArrayList<Sendable> {
+        val resultList = ArrayList<Sendable>()
         selectedFiles.forEach { file ->
             when (file.type) {
                 File.Type.App -> {
                     fileApkDirMap[file]?.let { apkDir ->
-                        resultList.add(apkDir)
+                        resultList.add(Sendable(file.title, apkDir))
                     }
                 }
 
                 else -> {
                     file.path?.let { path ->
-                        resultList.add(path)
+                        resultList.add(Sendable(file.title, path))
                     }
                 }
             }
         }
         return resultList
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == FILE_CHOOSER_REQUEST_CODE) {
+            if (resultCode == Activity.RESULT_OK) {
+                val clipData: ClipData? = data?.clipData
+                val clipDataList = ArrayList<String>()
+                for (index in 0 until (clipData?.itemCount ?: 0)) {
+                    clipData?.getItemAt(index)?.uri?.let { clipDataList.add(it.toString()) }
+                }
+                data?.data?.let {
+                    clipDataList.add(it.toString())
+                }
+                val returnIntent = Intent()
+                val sendableList = ArrayList<Sendable>()
+                clipDataList.forEach { uri ->
+                    contentResolver?.query(Uri.parse(uri), null, null, null, null)?.use { cursor ->
+                        val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                        cursor.moveToFirst()
+                        val fileName = cursor.getString(nameIndex)
+                        sendableList.add(Sendable(fileName, uri))
+                    }
+                }
+
+                returnIntent.putParcelableArrayListExtra(
+                    Viewer.KEY_VIEWER_SELECTED_LIST,
+                    sendableList
+                ).putExtra(
+                    Viewer.KEY_VIEWER_SELECTED_LIST_TYPE,
+                    Viewer.KEY_VIEWER_SELECTED_LIST_TYPE_URI
+                )
+                setResult(Activity.RESULT_OK, returnIntent)
+                finish()
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data)
     }
 }
