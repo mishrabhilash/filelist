@@ -1,6 +1,7 @@
 package com.abhilashmishra.filelist
 
 import android.app.Activity
+import android.content.ClipData
 import android.content.ContentResolver
 import android.content.Intent
 import android.content.pm.ApplicationInfo
@@ -31,6 +32,7 @@ import kotlinx.android.synthetic.main.activity_list.*
 
 class ListActivity : AppCompatActivity(), ListFragment.Listener {
 
+    private val FILE_CHOOSER_REQUEST_CODE: Int = 1001
     private var viewPager: ViewPager2? = null
     private var adapter: ViewPagerAdapter? = null
     private var tabLayout: TabLayout? = null
@@ -75,8 +77,49 @@ class ListActivity : AppCompatActivity(), ListFragment.Listener {
                 sendResult()
                 true
             }
+            R.id.main_menu_system_file -> {
+                launchFileExplorer()
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun launchFileExplorer() {
+        val intent = Intent(Intent.ACTION_GET_CONTENT)
+        intent.setType("*/*")
+        intent.addCategory(Intent.CATEGORY_OPENABLE)
+        intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true)
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+
+        startActivityForResult(intent, FILE_CHOOSER_REQUEST_CODE)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == FILE_CHOOSER_REQUEST_CODE) {
+            if (resultCode == Activity.RESULT_OK) {
+                val clipData: ClipData? = data?.clipData
+                val clipDataList = ArrayList<String>()
+                for (index in 0 until (clipData?.itemCount ?: 0)) {
+                    clipData?.getItemAt(index)?.uri?.let { clipDataList.add(it.toString()) }
+                }
+                data?.data?.let {
+                    clipDataList.add(it.toString())
+                }
+
+                val returnIntent = Intent()
+                returnIntent.putStringArrayListExtra(
+                    Viewer.KEY_VIEWER_SELECTED_LIST,
+                    clipDataList
+                ).putExtra(
+                    Viewer.KEY_VIEWER_SELECTED_LIST_TYPE,
+                    Viewer.KEY_VIEWER_SELECTED_LIST_TYPE_URI
+                )
+                setResult(Activity.RESULT_OK, returnIntent)
+                finish()
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data)
     }
 
     override fun onFileClicked(file: File, isSelected: Boolean) {
@@ -209,7 +252,12 @@ class ListActivity : AppCompatActivity(), ListFragment.Listener {
 
     private fun sendResult() {
         val returnIntent = Intent()
-        returnIntent.putStringArrayListExtra(Viewer.KEY_VIEWER_SELECTED_LIST, getResultList())
+        returnIntent
+            .putStringArrayListExtra(Viewer.KEY_VIEWER_SELECTED_LIST, getResultList())
+            .putExtra(
+                Viewer.KEY_VIEWER_SELECTED_LIST_TYPE,
+                Viewer.KEY_VIEWER_SELECTED_LIST_TYPE_FILEPATH
+            )
         setResult(Activity.RESULT_OK, returnIntent)
         finish()
     }

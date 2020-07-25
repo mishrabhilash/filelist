@@ -9,7 +9,10 @@ import com.abhilashmishra.filelist.model.Item
 class Viewer(private val activity: Activity) {
     companion object {
         const val VIEWER_REQUEST_CODE = 9874
-        const val KEY_VIEWER_SELECTED_LIST = "viewer_list_fkajn"
+        const val KEY_VIEWER_SELECTED_LIST = "viewer_list"
+        const val KEY_VIEWER_SELECTED_LIST_TYPE = "viewer_list_type"
+        const val KEY_VIEWER_SELECTED_LIST_TYPE_FILEPATH = "viewer_list_type_filepath"
+        const val KEY_VIEWER_SELECTED_LIST_TYPE_URI = "viewer_list_type_uri"
     }
 
     fun startList() {
