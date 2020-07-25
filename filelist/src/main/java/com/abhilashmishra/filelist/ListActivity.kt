@@ -12,6 +12,7 @@ import android.provider.MediaStore
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.viewpager2.widget.ViewPager2
@@ -22,6 +23,10 @@ import com.abhilashmishra.filelist.fragment.ListFragment
 import com.abhilashmishra.filelist.model.File
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Flowable
+import io.reactivex.rxjava3.schedulers.Schedulers
+import kotlinx.android.synthetic.main.activity_list.*
 
 
 class ListActivity : AppCompatActivity(), ListFragment.Listener {
@@ -41,9 +46,16 @@ class ListActivity : AppCompatActivity(), ListFragment.Listener {
         setContentView(R.layout.activity_list)
 
         initViews()
-        initActionBar()
-        createDataset()
-        setupViewPager()
+        setActionBarTitle()
+
+        progress.visibility = View.VISIBLE
+        Flowable.fromCallable { createDataset() }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe {
+                setupViewPager()
+                progress.visibility = View.GONE
+            }
     }
 
     override fun onDestroy() {
@@ -79,14 +91,6 @@ class ListActivity : AppCompatActivity(), ListFragment.Listener {
     private fun initViews() {
         viewPager = findViewById(R.id.main_view_pager)
         tabLayout = findViewById(R.id.main_tab_layout)
-        toolbar = findViewById(R.id.main_toolbar)
-    }
-
-    private fun initActionBar() {
-        toolbar?.let {
-            setSupportActionBar(it)
-            setActionBarTitle()
-        }
     }
 
     private fun setupViewPager() {
