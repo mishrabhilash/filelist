@@ -22,8 +22,13 @@
             android:id="@+id/main_tab_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="?colorPrimary"
             app:tabBackground="?colorPrimary"
+            app:tabIndicatorColor="?colorAccent"
+            app:tabIndicatorFullWidth="true"
             app:tabMode="scrollable"
+            app:tabPaddingEnd="12dp"
+            app:tabPaddingStart="12dp"
             app:tabTextAppearance="@style/TextAppearance.MaterialComponents.Body1"
             app:tabTextColor="#000000" />
 
