@@ -1,8 +1,8 @@
 package com.abhilashmishra.filelist.core
 
 import android.app.Activity
-import android.app.ListActivity
 import android.content.Intent
+import com.abhilashmishra.filelist.ListActivity
 import com.abhilashmishra.filelist.ViewerActivity
 import com.abhilashmishra.filelist.model.Item
 
