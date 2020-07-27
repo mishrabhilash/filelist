@@ -154,7 +154,7 @@ class ListActivity : AppCompatActivity(), ListFragment.Listener {
         val projection: Array<String>? = null
         val selection: String? = null
         val selectionArgs: Array<String>? = null
-        val sortOrder: String? = null // unordered
+        val sortOrder: String? = MediaStore.MediaColumns.DATE_ADDED + " DESC" // unordered
         val mimeTypeCache = HashMap<String, Boolean>()
         cr.query(uri, projection, selection, selectionArgs, sortOrder).use { cur ->
             if (cur != null) {
