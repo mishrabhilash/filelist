@@ -45,10 +45,28 @@
         android:id="@+id/progress"
         android:layout_width="120dp"
         android:layout_height="120dp"
+        android:layout_gravity="center"
+        android:visibility="gone"
         app:lottie_autoPlay="true"
         app:lottie_loop="true"
-        app:lottie_rawRes="@raw/searching"
-        android:layout_gravity="center"
-        android:visibility="gone" />
+        app:lottie_rawRes="@raw/searching" />
+
+    <FrameLayout
+        android:id="@+id/sendContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="?colorAccent"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/sendButton"
+            style="?textAppearanceHeadline6"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:gravity="center" />
+    </FrameLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

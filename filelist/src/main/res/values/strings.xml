@@ -3,6 +3,10 @@
     <string name="miscellaneous">Miscellaneous</string>
     <string name="done_text">Send</string>
     <string name="system">Phone\'s File Explorer</string>
+    <plurals name="send_x_files">
+        <item quantity="one">Send %d file</item>
+        <item quantity="other">Send %d files</item>
+    </plurals>
 
     <plurals name="num_files_selected_text">
         <item quantity="zero">%1$d file selected</item>

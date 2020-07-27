@@ -76,10 +76,10 @@ class ListActivity : AppCompatActivity(), ListFragment.Listener {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.main_menu_done -> {
-                sendResult()
-                true
-            }
+//            R.id.main_menu_done -> {
+//                sendResult()
+//                true
+//            }
             R.id.main_menu_system_file -> {
                 launchFileExplorer()
                 true
@@ -105,12 +105,27 @@ class ListActivity : AppCompatActivity(), ListFragment.Listener {
             selectedFiles.remove(file)
         }
         setActionBarTitle()
+        setButtonTextAndVisibility()
+
+    }
+
+    private fun setButtonTextAndVisibility() {
+        if (selectedFiles.size >= 1) {
+            sendContainer.visibility = View.VISIBLE
+            sendButton.text =
+                resources.getQuantityString(R.plurals.send_x_files, selectedFiles.size, selectedFiles.size)
+        } else{
+            sendContainer.visibility = View.GONE
+        }
     }
 
     private fun initViews() {
         viewPager = findViewById(R.id.main_view_pager)
         tabLayout = findViewById(R.id.main_tab_layout)
         toolbar = findViewById(R.id.main_toolbar)
+        sendContainer.setOnClickListener {
+            sendResult()
+        }
     }
 
     private fun setupViewPager() {
