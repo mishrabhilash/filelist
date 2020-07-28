@@ -8,17 +8,17 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.abhilashmishra.filelist.R
+import com.abhilashmishra.filelist.model.Item
+import com.abhilashmishra.filelist.view_holder.PdfViewHolder
+import com.abhilashmishra.filelist.view_holder.PhotoViewHolder
+import com.abhilashmishra.filelist.view_holder.UnsupportedMimeTypeViewHolder
+import com.abhilashmishra.filelist.view_holder.VideoViewHolder
 import com.bumptech.glide.RequestManager
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.util.Util
-import com.abhilashmishra.filelist.model.Item
-import com.abhilashmishra.filelist.view_holder.PdfViewHolder
-import com.abhilashmishra.filelist.view_holder.PhotoViewHolder
-import com.abhilashmishra.filelist.view_holder.UnsupportedMimeTypeViewHolder
-import com.abhilashmishra.filelist.view_holder.VideoViewHolder
 import java.io.File
 
 
@@ -41,7 +41,7 @@ class ViewerAdapter(private val context : Context
             }
 
             Item.Type.Video -> {
-            TYPE_VIDEO
+                TYPE_VIDEO
             }
 
             Item.Type.PDF -> {

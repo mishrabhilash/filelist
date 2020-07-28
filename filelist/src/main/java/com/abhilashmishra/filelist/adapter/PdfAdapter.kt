@@ -9,12 +9,14 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.abhilashmishra.filelist.R
 import com.abhilashmishra.filelist.view_holder.PdfItemViewHolder
+import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestManager
+import com.bumptech.glide.request.RequestOptions
+import java.lang.Exception
 
-class PdfAdapter(private val pageWidth: Int, private val glide: RequestManager) :
-    RecyclerView.Adapter<PdfItemViewHolder>() {
+class PdfAdapter(private val pageWidth : Int, private val glide : RequestManager) : RecyclerView.Adapter<PdfItemViewHolder>() {
 
-    private var renderer: PdfRenderer? = null
+    private var renderer : PdfRenderer? = null
 
     override fun getItemCount(): Int {
         return renderer?.pageCount ?: 0
@@ -23,33 +25,32 @@ class PdfAdapter(private val pageWidth: Int, private val glide: RequestManager) 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PdfItemViewHolder {
         return PdfItemViewHolder(
             LayoutInflater.from(parent.context)
-                .inflate(R.layout.pdf_item, parent, false)
-        )
+                .inflate(R.layout.pdf_item, parent, false))
     }
 
     override fun onBindViewHolder(holder: PdfItemViewHolder, position: Int) {
-        try {
+        try{
             glide
                 .load(renderer!!.openPage(position).renderAndClose(pageWidth))
                 .into(holder.imageView)
-        } catch (e: KotlinNullPointerException) {
+        }catch (e : KotlinNullPointerException){
             e.printStackTrace()
         }
     }
 
-    fun setRenderer(pdfRenderer: PdfRenderer) {
+    fun setRenderer(pdfRenderer: PdfRenderer){
         renderer = pdfRenderer
         notifyDataSetChanged()
     }
 
     private fun PdfRenderer.Page.renderAndClose(width: Int): Bitmap? {
-        var bitmap: Bitmap? = null
-        try {
+        var bitmap : Bitmap? = null
+        try{
             bitmap = createBitmap(width)
             render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
-        } catch (e: Exception) {
+        }catch (e : Exception){
             e.printStackTrace()
-        } finally {
+        }finally {
             close()
         }
         return bitmap
