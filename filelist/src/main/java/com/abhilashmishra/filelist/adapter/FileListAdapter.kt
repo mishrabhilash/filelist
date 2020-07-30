@@ -32,17 +32,39 @@ class FileListAdapter(private val listener : Listener, private val files : Array
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val title = files[position].title
+        holder.title.text = title
+
+        if (selectedFiles.contains(files[position])) {
+            holder.thumbnail.setImageResource(R.drawable.ic_tick)
+        } else {
+            setDefaultImage(holder, position)
+        }
+
+        holder.itemView.setOnClickListener {
+            if (selectedFiles.contains(files[position])) {
+                setDefaultImage(holder, position)
+                selectedFiles.remove(files[position])
+                listener.onFileClicked(files[position], false)
+            } else {
+                holder.thumbnail.setImageResource(R.drawable.ic_tick)
+                selectedFiles.add(files[position])
+                listener.onFileClicked(files[position], true)
+            }
+        }
+    }
+
+    private fun setDefaultImage(holder: ViewHolder, position: Int) {
         val path = files[position].path
         val type = files[position].type
         val iconDrawable = files[position].appIcon
-        when(type){
+        when (type) {
             File.Type.Photo -> {
                 glide.load(path)
                     .into(holder.thumbnail)
             }
 
             File.Type.App -> {
-                if(iconDrawable != null)
+                if (iconDrawable != null)
                     holder.thumbnail.setImageDrawable(iconDrawable)
             }
 
@@ -60,25 +82,6 @@ class FileListAdapter(private val listener : Listener, private val files : Array
 
             File.Type.Other -> {
                 holder.thumbnail.setImageResource(R.drawable.ic_file)
-            }
-        }
-        holder.title.text = title
-
-        if(selectedFiles.contains(files[position])){
-            holder.itemView.alpha = 0.5f
-        }else{
-            holder.itemView.alpha = 1f
-        }
-
-        holder.itemView.setOnClickListener{
-            if(selectedFiles.contains(files[position])){
-                holder.itemView.alpha = 1f
-                selectedFiles.remove(files[position])
-                listener.onFileClicked(files[position], false)
-            }else{
-                holder.itemView.alpha = 0.5f
-                selectedFiles.add(files[position])
-                listener.onFileClicked(files[position], true)
             }
         }
     }
