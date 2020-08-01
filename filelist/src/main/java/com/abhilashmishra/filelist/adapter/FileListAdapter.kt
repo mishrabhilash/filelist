@@ -83,6 +83,10 @@ class FileListAdapter(private val listener : Listener, private val files : Array
         }
     }
 
+    fun addItems(){
+        notifyDataSetChanged()
+    }
+
     class ViewHolder(itemView : View) : RecyclerView.ViewHolder(itemView){
         val thumbnail: ImageView = itemView.findViewById(R.id.list_item_thumb)
         val title: TextView = itemView.findViewById(R.id.list_item_title)

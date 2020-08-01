@@ -2,15 +2,13 @@ package com.abhilashmishra.filelist
 
 import android.app.Activity
 import android.content.ClipData
-import android.content.ContentResolver
 import android.content.Intent
 import android.content.pm.ApplicationInfo
-import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore
 import android.provider.OpenableColumns
+import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -21,6 +19,8 @@ import androidx.viewpager2.widget.ViewPager2
 import com.abhilashmishra.filelist.adapter.FileListAdapter
 import com.abhilashmishra.filelist.adapter.ViewPagerAdapter
 import com.abhilashmishra.filelist.core.Viewer
+import com.abhilashmishra.filelist.dataset.Dataset
+import com.abhilashmishra.filelist.dataset.listener.Listener
 import com.abhilashmishra.filelist.fragment.ListFragment
 import com.abhilashmishra.filelist.model.File
 import com.abhilashmishra.filelist.model.Sendable
@@ -30,6 +30,10 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_list.*
+import java.util.*
+import kotlin.Comparator
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 
 class ListActivity : AppCompatActivity(), ListFragment.Listener {
@@ -39,6 +43,28 @@ class ListActivity : AppCompatActivity(), ListFragment.Listener {
     private var adapter: ViewPagerAdapter? = null
     private var tabLayout: TabLayout? = null
     private var toolbar: Toolbar? = null
+
+    private var order = hashMapOf<String, Int>(
+        Pair(File.Type.Photo.name, 0) // Photo -> 1
+        , Pair(File.Type.Video.name, 1) // Video -> 2
+        , Pair(File.Type.App.name, 2) // App -> 3
+        , Pair(File.Type.Audio.name, 3) // Audio -> 4
+        , Pair(File.Type.Pdf.name, 4) // Pdf -> 5
+        , Pair(File.Type.Other.name, 5)) // Other -> 6
+
+    val fileTypeComparator = Comparator<String> { o1, o2 ->
+        when {
+            order[o1]!! < order[o2]!! -> {
+                -1
+            }
+            order[o1]!! > order[o2]!! -> {
+                1
+            }
+            else -> {
+                0
+            }
+        }
+    }
 
     private var datasetMap = HashMap<String, ArrayList<File>>()
     private var mimeTypeIndex = ArrayList<String>()
@@ -52,15 +78,17 @@ class ListActivity : AppCompatActivity(), ListFragment.Listener {
         initViews()
         setSupportActionBar(toolbar)
         setActionBarTitle()
+        setupViewPager()
 
-        progress.visibility = View.VISIBLE
-        Flowable.fromCallable { createDataset() }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe {
-                setupViewPager()
-                progress.visibility = View.GONE
-            }
+        createDataset()
+        progress.visibility = View.GONE
+//        Flowable.fromCallable { createDataset() }
+//            .subscribeOn(Schedulers.io())
+//            .observeOn(AndroidSchedulers.mainThread())
+//            .subscribe {
+//                setupViewPager()
+//                progress.visibility = View.GONE
+//            }
     }
 
     override fun onDestroy() {
@@ -149,52 +177,22 @@ class ListActivity : AppCompatActivity(), ListFragment.Listener {
     }
 
     private fun createDataset() {
-        val cr: ContentResolver = contentResolver
-        val uri: Uri = MediaStore.Files.getContentUri("external")
-        val projection: Array<String>? = null
-        val selection: String? = null
-        val selectionArgs: Array<String>? = null
-        val sortOrder: String? = MediaStore.MediaColumns.DATE_ADDED + " DESC" // unordered
-        val mimeTypeCache = HashMap<String, Boolean>()
-        cr.query(uri, projection, selection, selectionArgs, sortOrder).use { cur ->
-            if (cur != null) {
-                while (cur.moveToNext()) {
-                    val path = cur.getString(cur.getColumnIndex(MediaStore.Files.FileColumns.DATA))
-                    val title = java.io.File(path).name
-                    val mimeType =
-                        cur.getString(cur.getColumnIndex(MediaStore.Files.FileColumns.MIME_TYPE))
-                    if (mimeType != null) {
-                        val file = getFile(path, title, mimeType, null)
-                        if (!mimeTypeCache.contains(file.type.name)) {
-                            mimeTypeCache[file.type.name] = true
-                            mimeTypeIndex.add(file.type.name)
-                            datasetMap[file.type.name] = arrayListOf(file)
-                        } else {
-                            datasetMap[file.type.name]?.add(file)
-                        }
+        val dataset = Dataset(object : Listener{
+            override fun onListLoaded(datasetMap : HashMap<String, ArrayList<File>>) {
+                for(keyVal in datasetMap){
+                    if(this@ListActivity.datasetMap.containsKey(keyVal.key)){
+                        this@ListActivity.datasetMap[keyVal.key]?.addAll(keyVal.value)
+                        adapter?.itemListInserted(mimeTypeIndex.indexOf(keyVal.key), keyVal.value)
+                    }else{
+                        this@ListActivity.datasetMap[keyVal.key] = keyVal.value
+                        val index = -(Collections.binarySearch(mimeTypeIndex, keyVal.key, fileTypeComparator) + 1)
+                        mimeTypeIndex.add(index, keyVal.key)
+                        adapter?.itemInserted(index)
                     }
                 }
             }
-        }
-        val mainIntent = Intent(Intent.ACTION_MAIN, null)
-        mainIntent.addCategory(Intent.CATEGORY_LAUNCHER)
-        packageManager.getInstalledApplications(PackageManager.GET_META_DATA)?.let {
-            it.forEach { applicationInfo ->
-                val icon = applicationInfo.loadIcon(packageManager)
-                if (!isSystemPackage(applicationInfo)) {
-                    val appName = "${packageManager.getApplicationLabel(applicationInfo)}.apk"
-                    val file = getFile("", appName.toString(), "APK", icon)
-                    fileApkDirMap[file] = getApkDir(applicationInfo)
-                    if (!mimeTypeCache.contains(file.type.name)) {
-                        mimeTypeCache[file.type.name] = true
-                        mimeTypeIndex.add(file.type.name)
-                        datasetMap[file.type.name] = arrayListOf(file)
-                    } else {
-                        datasetMap[file.type.name]?.add(file)
-                    }
-                }
-            }
-        }
+        })
+        dataset.createDataset(this, 100)
     }
 
     private fun getFile(path: String, title: String, mimeType: String, icon: Drawable?): File {

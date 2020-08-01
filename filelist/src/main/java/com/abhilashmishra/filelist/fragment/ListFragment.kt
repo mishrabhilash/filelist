@@ -55,6 +55,11 @@ class ListFragment : Fragment(), FileListAdapter.Listener {
         this.files.addAll(files)
     }
 
+    fun insertItems(files : ArrayList<File>){
+        this.files.addAll(files)
+        adapter?.addItems()
+    }
+
     private fun initViews(rootView : View){
         recyclerView = rootView.findViewById(R.id.file_list_recycler_view)
     }
