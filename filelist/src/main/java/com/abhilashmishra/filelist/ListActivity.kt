@@ -141,11 +141,15 @@ class ListActivity : AppCompatActivity(), ListFragment.Listener {
     }
 
     private fun setActionBarTitle() {
-        toolbar?.title = resources.getQuantityString(
-            R.plurals.num_files_selected_text,
-            selectedFiles.size,
-            selectedFiles.size
-        )
+        if(selectedFiles.size > 0) {
+            toolbar?.title = resources.getQuantityString(
+                R.plurals.num_files_selected_text,
+                selectedFiles.size,
+                selectedFiles.size
+            )
+        }else {
+            toolbar?.title = "File Browser"
+        }
     }
 
     private fun createDataset() {
