@@ -3,12 +3,9 @@ package com.abhilashmishra.filelist
 import android.app.Activity
 import android.content.ClipData
 import android.content.Intent
-import android.content.pm.ApplicationInfo
-import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
-import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -26,9 +23,6 @@ import com.abhilashmishra.filelist.model.File
 import com.abhilashmishra.filelist.model.Sendable
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.core.Flowable
-import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_list.*
 import java.util.*
 import kotlin.Comparator
@@ -180,6 +174,13 @@ class ListActivity : AppCompatActivity(), ListFragment.Listener {
         val dataset = Dataset(object : Listener{
             override fun onListLoaded(datasetMap : HashMap<String, ArrayList<File>>) {
                 for(keyVal in datasetMap){
+                    for(file in keyVal.value){
+                        if(file.type == File.Type.App){
+                            file.path?.let{
+                                fileApkDirMap[file] = it
+                            }
+                        }
+                    }
                     if(this@ListActivity.datasetMap.containsKey(keyVal.key)){
                         this@ListActivity.datasetMap[keyVal.key]?.addAll(keyVal.value)
                         adapter?.itemListInserted(mimeTypeIndex.indexOf(keyVal.key), keyVal.value)

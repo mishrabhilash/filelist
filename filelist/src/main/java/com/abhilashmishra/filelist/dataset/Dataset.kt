@@ -7,7 +7,6 @@ import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.provider.MediaStore
-import android.util.Log
 import com.abhilashmishra.filelist.dataset.listener.Listener
 import com.abhilashmishra.filelist.model.File
 import kotlinx.coroutines.*
@@ -60,7 +59,6 @@ class Dataset(private val listener : Listener){
     private suspend fun loadApk(activity : Activity){
         return withContext(Dispatchers.IO){
             val datasetMap = HashMap<String, ArrayList<File>>()
-            val fileApkDirMap = HashMap<File, String>()
             val mainIntent = Intent(Intent.ACTION_MAIN, null)
             mainIntent.addCategory(Intent.CATEGORY_LAUNCHER)
             val packageManager = activity.packageManager
@@ -69,8 +67,7 @@ class Dataset(private val listener : Listener){
                     val icon = applicationInfo.loadIcon(packageManager)
                     if (!isSystemPackage(applicationInfo)) {
                         val appName = "${packageManager.getApplicationLabel(applicationInfo)}.apk"
-                        val file = getFile("", appName.toString(), "APK", icon)
-                        fileApkDirMap[file] = getApkDir(applicationInfo)
+                        val file = getFile(getApkDir(applicationInfo), appName.toString(), "APK", icon)
                         if (!datasetMap.contains(file.type.name)) {
                             datasetMap[file.type.name] = arrayListOf(file)
                         } else {
