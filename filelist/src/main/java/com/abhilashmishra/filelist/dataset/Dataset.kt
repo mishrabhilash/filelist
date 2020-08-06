@@ -6,6 +6,7 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.os.AsyncTask
 import android.provider.MediaStore
 import com.abhilashmishra.filelist.dataset.listener.Listener
 import com.abhilashmishra.filelist.model.File
@@ -16,13 +17,13 @@ class Dataset(private val listener : Listener){
     private var currentPosition = 0
 
     fun createDataset(activity : Activity, paginationLimit : Int){
-        CoroutineScope(Dispatchers.IO).launch {
+        AsyncTask.execute {
             paginateOther(activity, paginationLimit)
             loadApk(activity)
         }
     }
 
-    private suspend fun loadOther(activity: Activity, limit : Int, startPosition : Int) : Int {
+    private fun loadOther(activity: Activity, limit : Int, startPosition : Int) : Int {
         val cr = activity.contentResolver
         val uri: Uri = MediaStore.Files.getContentUri("external")
         val projection: Array<String>? = null
@@ -47,49 +48,46 @@ class Dataset(private val listener : Listener){
                         }
                     }
                 }
-                withContext(Dispatchers.Main){
+                activity.runOnUiThread{
                     listener.onListLoaded(datasetMap)
                 }
+
                 return cur.count
             }
         }
         return -1
     }
 
-    private suspend fun loadApk(activity : Activity){
-        return withContext(Dispatchers.IO){
-            val datasetMap = HashMap<String, ArrayList<File>>()
-            val mainIntent = Intent(Intent.ACTION_MAIN, null)
-            mainIntent.addCategory(Intent.CATEGORY_LAUNCHER)
-            val packageManager = activity.packageManager
-            packageManager.getInstalledApplications(PackageManager.GET_META_DATA)?.let {
-                it.forEach { applicationInfo ->
-                    val icon = applicationInfo.loadIcon(packageManager)
-                    if (!isSystemPackage(applicationInfo)) {
-                        val appName = "${packageManager.getApplicationLabel(applicationInfo)}.apk"
-                        val file = getFile(getApkDir(applicationInfo), appName.toString(), "APK", icon)
-                        if (!datasetMap.contains(file.type.name)) {
-                            datasetMap[file.type.name] = arrayListOf(file)
-                        } else {
-                            datasetMap[file.type.name]?.add(file)
-                        }
+    private fun loadApk(activity : Activity){
+        val datasetMap = HashMap<String, ArrayList<File>>()
+        val mainIntent = Intent(Intent.ACTION_MAIN, null)
+        mainIntent.addCategory(Intent.CATEGORY_LAUNCHER)
+        val packageManager = activity.packageManager
+        packageManager.getInstalledApplications(PackageManager.GET_META_DATA)?.let {
+            it.forEach { applicationInfo ->
+                val icon = applicationInfo.loadIcon(packageManager)
+                if (!isSystemPackage(applicationInfo)) {
+                    val appName = "${packageManager.getApplicationLabel(applicationInfo)}.apk"
+                    val file = getFile(getApkDir(applicationInfo), appName.toString(), "APK", icon)
+                    if (!datasetMap.contains(file.type.name)) {
+                        datasetMap[file.type.name] = arrayListOf(file)
+                    } else {
+                        datasetMap[file.type.name]?.add(file)
                     }
                 }
-                withContext(Dispatchers.Main){
-                    listener.onListLoaded(datasetMap)
-                }
-                return@withContext
             }
+            activity.runOnUiThread {
+                listener.onListLoaded(datasetMap)
+            }
+
         }
     }
 
-    private suspend fun paginateOther(activity : Activity, paginationLimit : Int){
-        return withContext(Dispatchers.IO) {
-            do{
-                val count = loadOther(activity, paginationLimit, currentPosition)
-                currentPosition += count
-            }while (count >= paginationLimit || count == -1)
-        }
+    private fun paginateOther(activity : Activity, paginationLimit : Int){
+        do{
+            val count = loadOther(activity, paginationLimit, currentPosition)
+            currentPosition += count
+        }while (count >= paginationLimit || count == -1)
     }
 
     private fun isSystemPackage(applicationInfo: ApplicationInfo): Boolean {
