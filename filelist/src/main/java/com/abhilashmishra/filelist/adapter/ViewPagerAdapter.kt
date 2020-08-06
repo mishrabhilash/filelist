@@ -46,7 +46,7 @@ class ViewPagerAdapter(activity : AppCompatActivity
     }
 
     fun itemInserted(position : Int){
-        notifyItemInserted(position)
+        notifyDataSetChanged()
     }
 
     fun itemListInserted(position : Int, list : ArrayList<File>){

@@ -8,6 +8,7 @@ import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.AsyncTask
 import android.provider.MediaStore
+import android.util.Log
 import com.abhilashmishra.filelist.dataset.listener.Listener
 import com.abhilashmishra.filelist.model.File
 import kotlinx.coroutines.*
@@ -59,6 +60,7 @@ class Dataset(private val listener : Listener){
     }
 
     private fun loadApk(activity : Activity){
+        Log.d("JHAFVAHFBAJKFBAJKF", "Loading apk")
         val datasetMap = HashMap<String, ArrayList<File>>()
         val mainIntent = Intent(Intent.ACTION_MAIN, null)
         mainIntent.addCategory(Intent.CATEGORY_LAUNCHER)
@@ -86,8 +88,11 @@ class Dataset(private val listener : Listener){
     private fun paginateOther(activity : Activity, paginationLimit : Int){
         do{
             val count = loadOther(activity, paginationLimit, currentPosition)
+            if(count == -1)
+                break
             currentPosition += count
-        }while (count >= paginationLimit || count == -1)
+            Log.d("JHAFVAHFBAJKFBAJKF", "Count: $count, $currentPosition, $paginationLimit")
+        }while (count >= paginationLimit)
     }
 
     private fun isSystemPackage(applicationInfo: ApplicationInfo): Boolean {

@@ -6,6 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
+import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -71,7 +72,6 @@ class ListActivity : AppCompatActivity(), ListFragment.Listener {
 
         initViews()
         setSupportActionBar(toolbar)
-        setActionBarTitle()
         setupViewPager()
 
         createDataset()
@@ -83,6 +83,11 @@ class ListActivity : AppCompatActivity(), ListFragment.Listener {
 //                setupViewPager()
 //                progress.visibility = View.GONE
 //            }
+    }
+
+    override fun onPostCreate(savedInstanceState: Bundle?) {
+        setActionBarTitle()
+        super.onPostCreate(savedInstanceState)
     }
 
     override fun onDestroy() {
@@ -187,6 +192,7 @@ class ListActivity : AppCompatActivity(), ListFragment.Listener {
                     }else{
                         this@ListActivity.datasetMap[keyVal.key] = keyVal.value
                         val index = -(Collections.binarySearch(mimeTypeIndex, keyVal.key, fileTypeComparator) + 1)
+                        Log.d("KJFNASKJFASJKFN", "Index: $index")
                         mimeTypeIndex.add(index, keyVal.key)
                         adapter?.itemInserted(index)
                     }
