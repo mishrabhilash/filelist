@@ -142,13 +142,13 @@ class ListActivity : AppCompatActivity(), ListFragment.Listener {
 
     private fun setActionBarTitle() {
         if(selectedFiles.size > 0) {
-            toolbar?.title = resources.getQuantityString(
+            supportActionBar?.title = resources.getQuantityString(
                 R.plurals.num_files_selected_text,
                 selectedFiles.size,
                 selectedFiles.size
             )
         }else {
-            toolbar?.title = "File Browser"
+            supportActionBar?.title = "File Browser"
         }
     }
 
