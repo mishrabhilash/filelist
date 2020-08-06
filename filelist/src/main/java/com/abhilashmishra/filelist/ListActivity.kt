@@ -195,51 +195,6 @@ class ListActivity : AppCompatActivity(), ListFragment.Listener {
         dataset.createDataset(this, 100)
     }
 
-    private fun getFile(path: String, title: String, mimeType: String, icon: Drawable?): File {
-        val type = when {
-            mimeType.contains("pdf", true) -> {
-                File.Type.Pdf
-            }
-
-            mimeType.contains("jpg", true)
-                    || mimeType.contains("png", true)
-                    || mimeType.contains("jpeg", true)
-                    || mimeType.contains("webp", true)
-                    || mimeType.contains("dng", true) -> {
-                File.Type.Photo
-            }
-
-            mimeType.contains("mp4", true) -> {
-                File.Type.Video
-            }
-
-            mimeType.contains("mp3", true)
-                    || mimeType.contains("mpeg", true)
-                    || mimeType.contains("aac-adts", true)
-                    || mimeType.contains("ogg", true) -> {
-                File.Type.Audio
-            }
-
-            mimeType.contains("APK", true) -> {
-                File.Type.App
-            }
-
-            else -> {
-                File.Type.Other
-            }
-        }
-
-        return File(type, title, path, icon)
-    }
-
-    private fun isSystemPackage(applicationInfo: ApplicationInfo): Boolean {
-        return applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM != 0
-    }
-
-    private fun getApkDir(applicationInfo: ApplicationInfo): String {
-        return applicationInfo.sourceDir
-    }
-
     private fun sendResult() {
         val returnIntent = Intent()
         returnIntent
