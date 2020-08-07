@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.abhilashmishra.filelist.R
 import com.abhilashmishra.filelist.model.File
+import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestManager
 
 class FileListAdapter(private val listener : Listener, private val files : ArrayList<File>, val glide : RequestManager) : RecyclerView.Adapter<FileListAdapter.ViewHolder>(){
@@ -53,6 +54,12 @@ class FileListAdapter(private val listener : Listener, private val files : Array
         }
     }
 
+    override fun onViewRecycled(holder: ViewHolder) {
+        glide.clear(holder.thumbnail)
+        holder.title.text = ""
+        super.onViewRecycled(holder)
+    }
+
     private fun setDefaultImage(holder: ViewHolder, position: Int) {
         val path = files[position].path
         val type = files[position].type
@@ -84,6 +91,10 @@ class FileListAdapter(private val listener : Listener, private val files : Array
                 holder.thumbnail.setImageResource(R.drawable.ic_file)
             }
         }
+    }
+
+    fun clear(){
+        notifyDataSetChanged()
     }
 
     fun addItems(){

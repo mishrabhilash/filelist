@@ -1,5 +1,6 @@
 package com.abhilashmishra.filelist.fragment
 
+import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -13,45 +14,23 @@ import com.abhilashmishra.filelist.adapter.FileListAdapter
 import com.abhilashmishra.filelist.model.File
 
 
-class ListFragment : Fragment(), FileListAdapter.Listener {
+class ListFragment(itemView : View, private val listener : Listener, private val context : Context) : RecyclerView.ViewHolder(itemView), FileListAdapter.Listener {
 
-    private var recyclerView : RecyclerView? = null
+    private var recyclerView = itemView.findViewById<RecyclerView>(R.id.file_list_recycler_view)
 
     private var adapter : FileListAdapter? = null
     private val files = ArrayList<File>()
-    private var listener : Listener? = null
-
-    companion object {
-
-        @JvmStatic
-        fun newInstance(listener : Listener) =
-            ListFragment().apply {
-                arguments = Bundle().apply {}
-                this.listener = listener
-            }
-    }
 
     interface Listener{
         fun onFileClicked(file : File, isSelected: Boolean)
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-        }
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        val rootView = inflater.inflate(R.layout.fragment_list, container, false)
-        initViews(rootView)
+    init{
         initRecyclerView()
-        return rootView
     }
 
-    fun addItems(files : ArrayList<File>){
+    fun setItems(files : ArrayList<File>){
+        this.files.clear()
         this.files.addAll(files)
     }
 
@@ -60,16 +39,15 @@ class ListFragment : Fragment(), FileListAdapter.Listener {
         adapter?.addItems()
     }
 
-    private fun initViews(rootView : View){
-        recyclerView = rootView.findViewById(R.id.file_list_recycler_view)
+    fun clearItems(){
+        files.clear()
+        adapter?.clear()
     }
 
     private fun initRecyclerView(){
-        activity?.applicationContext?.let {
-            adapter = FileListAdapter(this@ListFragment, files, Glide.with(it))
-            recyclerView?.layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
-            recyclerView?.adapter = adapter
-        }
+        adapter = FileListAdapter(this@ListFragment, files, Glide.with(context))
+        recyclerView?.layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
+        recyclerView?.adapter = adapter
     }
 
     override fun onFileClicked(file: File, isSelected : Boolean) {

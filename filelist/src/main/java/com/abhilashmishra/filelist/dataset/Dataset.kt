@@ -60,7 +60,6 @@ class Dataset(private val listener : Listener){
     }
 
     private fun loadApk(activity : Activity){
-        Log.d("JHAFVAHFBAJKFBAJKF", "Loading apk")
         val datasetMap = HashMap<String, ArrayList<File>>()
         val mainIntent = Intent(Intent.ACTION_MAIN, null)
         mainIntent.addCategory(Intent.CATEGORY_LAUNCHER)
@@ -91,7 +90,6 @@ class Dataset(private val listener : Listener){
             if(count == -1)
                 break
             currentPosition += count
-            Log.d("JHAFVAHFBAJKFBAJKF", "Count: $count, $currentPosition, $paginationLimit")
         }while (count >= paginationLimit)
     }
 
