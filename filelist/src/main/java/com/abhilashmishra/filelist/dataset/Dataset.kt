@@ -30,7 +30,7 @@ class Dataset(private val listener : Listener){
         val projection: Array<String>? = null
         val selection: String? = null
         val selectionArgs: Array<String>? = null
-        val sortOrder: String? = MediaStore.MediaColumns.DATE_ADDED + " DESC LIMIT " + limit + " OFFSET " + startPosition
+        val sortOrder: String? = MediaStore.Files.FileColumns.DATE_ADDED + " DESC LIMIT " + limit + " OFFSET " + startPosition
         val datasetMap = HashMap<String, ArrayList<File>>()
 
         cr.query(uri, projection, selection, selectionArgs, sortOrder).use { cur ->
