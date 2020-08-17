@@ -210,6 +210,7 @@ class ListActivity : AppCompatActivity(), ListFragment.Listener {
                 Viewer.KEY_VIEWER_SELECTED_LIST_TYPE,
                 Viewer.KEY_VIEWER_SELECTED_LIST_TYPE_FILEPATH
             )
+            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         setResult(Activity.RESULT_OK, returnIntent)
         finish()
     }
